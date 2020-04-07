@@ -169,6 +169,7 @@ void MyTable::createMenu()
 
 void MyTable::showContextMenu(const QPoint &pos)
 {
+    qDebug() << pos;
     m_menu->exec(QCursor::pos());
 }
 
@@ -196,7 +197,7 @@ void MyTable::getSelectedRows(QList<int> &l)
         int row = this->row(items[i]);
         if(l.indexOf(row) == -1)l.push_back(row);
     }
-    qSort(l.begin(),l.end());
+    std::sort(l.begin(),l.end());
 }
 
 void MyTable::ActionClicked()

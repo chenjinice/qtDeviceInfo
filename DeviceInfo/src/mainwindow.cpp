@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     m_allIp = new AllIp;
-    this->setWindowTitle("测试软件 - V2020.04.03");
+    this->setWindowTitle("测试软件 - V2020.04.07");
     this->createCentralWidget();
     this->createCombo();
     this->createButton();
@@ -110,18 +110,18 @@ void MainWindow::addClicked()
 
 void MainWindow::getAllIp(QList<IpData> l)
 {
-    m_table->addClient(l);
+//    m_table->addClient(l);
 
-//    static int i = 0;
-//    if(i++ > 0)return;
-//    QList<IpData> list;
-//    for(int i=0;i<4;i++){
-//        IpData d;
-//        d.ip = "127.0.0.1";
-//        d.port = C_PORT+i;
-//        d.id = AllIp::ipToId(d.ip);
-//        d.cmd = IP_ADD;
-//        list.append(d);
-//    }
-//    m_table->addClient(list);
+    static int i = 0;
+    if(i++ > 0)return;
+    QList<IpData> list;
+    for(int i=0;i<60;i++){
+        IpData d;
+        d.ip = "192.168.99."+QString::number(i+100);
+        d.port = C_PORT;
+        d.id = AllIp::ipToId(d.ip);
+        d.cmd = IP_ADD;
+        list.append(d);
+    }
+    m_table->addClient(list);
 }
