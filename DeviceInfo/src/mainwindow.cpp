@@ -9,25 +9,29 @@
 #include "setting.h"
 #include "mytable.h"
 #include "mydialog.h"
+#include "common.h"
+#include "udpthread.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    m_allIp = new AllIp;
-    this->setWindowTitle("测试软件 - V2020.04.07");
+    m_udpThread = UdpThread::ins();
+    m_table = new MyTable;
+    connect(m_udpThread,&UdpThread::bindState,this,&MainWindow::udpState);
+    connect(m_udpThread,&UdpThread::getIp,m_table,&MyTable::addIp);
     this->createCentralWidget();
     this->createCombo();
     this->createButton();
-    this->createTable();
+    m_layout->addWidget(m_table);
     this->setMinimumSize(1000,500);
-    connect(m_allIp,&AllIp::sent,this,&MainWindow::getAllIp);
+    this->setWindowTitle("测试软件 - V2020.04.08");
 }
 
 MainWindow::~MainWindow()
 {
-    delete  m_allIp;
-    delete  m_table;
+    delete m_udpThread;
+    delete m_table;
 }
 
 void MainWindow::createCentralWidget()
@@ -42,8 +46,10 @@ void MainWindow::createCombo()
 {
     QHBoxLayout *hbox = new QHBoxLayout;
     hbox->setAlignment(Qt::AlignLeft);
-    QStringList l = AllIp::getSelfIp();
-    QLabel *label_card     = new QLabel("网卡 ：");
+    QStringList l = getSelfIp();
+    QLabel *label_card     = new QLabel("Udp ：");
+    m_labelState           = new QLabel;
+    m_labelState->setFixedWidth(15);
     QComboBox *combo = new QComboBox;
     for(int i=0;i<l.count();i++){
         combo->addItem(l.at(i));
@@ -53,12 +59,13 @@ void MainWindow::createCombo()
     }
     hbox->addWidget(label_card);
     hbox->addWidget(combo);
+    hbox->addWidget(m_labelState);
     if(!combo->currentText().isEmpty()){
         QString ip = combo->currentText();
-        m_allIp->setCard(ip);
+        m_udpThread->startThread(ip);
     }
     m_layout->addLayout(hbox);
-    connect(combo,&QComboBox::currentTextChanged,this,&MainWindow::textChanged);
+    connect(combo,&QComboBox::currentTextChanged,m_udpThread,&UdpThread::setIp);
 }
 
 void MainWindow::createButton()
@@ -66,31 +73,28 @@ void MainWindow::createButton()
     QHBoxLayout *hbox = new QHBoxLayout;
     hbox->setAlignment(Qt::AlignLeft);
     QLabel *label_other = new QLabel("其他 ：");
-    m_checkBox = new QCheckBox("自动连接");
-    QPushButton *add = new QPushButton("添加ip");
-    QPushButton *clear = new QPushButton("清空表格");
+    QCheckBox *check_box = new QCheckBox("自动连接");
+    QPushButton *sort_bt = new QPushButton("按IP排序");
+    QPushButton *clear = new QPushButton("清表格");
+    QPushButton *add = new QPushButton("添IP");
     hbox->addWidget(label_other);
-//    hbox->addWidget(m_checkBox);
-    hbox->addWidget(add);
+    hbox->addWidget(check_box);
+    hbox->addWidget(sort_bt);
     hbox->addWidget(clear);
+    hbox->addWidget(add);
     m_layout->addLayout(hbox);
+    check_box->setChecked(Setting::ins()->getMode());
     connect(add,&QPushButton::clicked,this,&MainWindow::addClicked);
     connect(clear,&QPushButton::clicked,this,&MainWindow::clearClicked);
+    connect(check_box,&QCheckBox::stateChanged,this,&MainWindow::checkBoxChanged);
+    connect(sort_bt,&QPushButton::clicked,m_table,&MyTable::sortByIp);
 }
 
-void MainWindow::createTable()
+void MainWindow::udpState(bool flag)
 {
-    QHBoxLayout *hbox = new QHBoxLayout;
-    m_table = new MyTable;
-    hbox->addWidget(m_table);
-    m_layout->addLayout(hbox);
-}
-
-void MainWindow::textChanged(QString str)
-{
-    Setting *s =  Setting::ins();
-    s->setCard(str);
-    m_allIp->setCard(str);
+    QString color = "background-color: rgb(255,0,0);border-radius:6px;";
+    if(flag)color = "background-color: rgb(0,255,0);border-radius:6px;";
+    m_labelState->setStyleSheet(color);
 }
 
 void MainWindow::clearClicked()
@@ -103,25 +107,15 @@ void MainWindow::addClicked()
     static MyDialog *s_dialog = nullptr;
     if(s_dialog == nullptr){
         s_dialog = new MyDialog;
-        connect(s_dialog,&MyDialog::addIp,m_table,&MyTable::addSingleIp);
+        connect(s_dialog,&MyDialog::addIp,m_table,&MyTable::addIp);
     }
     s_dialog->show();
 }
 
-void MainWindow::getAllIp(QList<IpData> l)
+void MainWindow::checkBoxChanged(int value)
 {
-//    m_table->addClient(l);
-
-    static int i = 0;
-    if(i++ > 0)return;
-    QList<IpData> list;
-    for(int i=0;i<60;i++){
-        IpData d;
-        d.ip = "192.168.99."+QString::number(i+100);
-        d.port = C_PORT;
-        d.id = AllIp::ipToId(d.ip);
-        d.cmd = IP_ADD;
-        list.append(d);
-    }
-    m_table->addClient(list);
+    bool flag = false;
+    if(value > 0)flag = true;
+    Setting::ins()->setMode(flag);
 }
+

@@ -1,21 +1,34 @@
 #ifndef MYTABLEITEM_H
 #define MYTABLEITEM_H
 
-#define C_IDROLE   0x100
-#define C_PORTROLE 0x101
-#define C_ERRROLE  0x102
 
+#define C_SORTROLE   0x100
+#define C_IDROLE     0x101
+#define C_TCPROLE    0x102
+#define C_PORTROLE   0x103
+#define C_ERRROLE    0x104
+
+class MyTable;
+class MyClient;
+
+#include <QObject>
 #include <QTableWidgetItem>
 
 
 class MyTableItem : public QTableWidgetItem
 {
 public:
-    MyTableItem();
+    MyTableItem(MyTable *ui);
     ~MyTableItem();
-    bool operator < (const QTableWidgetItem &other) const;
+    void setParam(QString &ip);
+    MyClient *getClient();
+    bool operator < (const MyTableItem &other) const;
 
 private:
+    MyTable     * m_ui;
+    MyClient    * m_client;
+    uint          m_sortId;
+    uint          m_err;
 
 };
 

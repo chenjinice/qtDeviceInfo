@@ -2,39 +2,39 @@
 #define MAINWINDOW_H
 
 
-class AllIp;
 class MyTable;
+class QLabel;
 class QVBoxLayout;
 class QCheckBox;
+class UdpThread;
+
 
 #include <QMainWindow>
-#include "allip.h"
+#include "common.h"
 
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private:
     QVBoxLayout  * m_layout;
-    QCheckBox    * m_checkBox;
-    AllIp        * m_allIp;
+    QLabel       * m_labelState;
+    UdpThread    * m_udpThread;
     MyTable      * m_table;
 
     void createCentralWidget();
     void createCombo();
     void createButton();
-    void createTable();
 
 public slots:
-    void textChanged(QString str);
+    void udpState(bool flag);
     void clearClicked();
     void addClicked();
-    void getAllIp(QList<IpData> l);
+    void checkBoxChanged(int value);
 };
 
 #endif // MAINWINDOW_H

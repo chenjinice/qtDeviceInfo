@@ -28,22 +28,24 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
+    src/common.cpp \
         src/mainwindow.cpp \
-    src/allip.cpp \
     src/myclient.cpp \
     src/mydialog.cpp \
     src/mytable.cpp \
     src/mytableitem.cpp \
-    src/setting.cpp
+    src/setting.cpp \
+    src/udpthread.cpp
 
 HEADERS += \
+    src/common.h \
         src/mainwindow.h \
-    src/allip.h \
     src/myclient.h \
     src/mydialog.h \
     src/mytable.h \
     src/mytableitem.h \
-    src/setting.h
+    src/setting.h \
+    src/udpthread.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

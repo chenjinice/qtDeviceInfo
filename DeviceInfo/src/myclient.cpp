@@ -19,25 +19,20 @@ UiData::UiData()
     this->state = false;
 }
 
-MyClient::MyClient(uint id, QString ip, quint16 port, MyTable *ui)
+MyClient::MyClient(QString ip, uint16_t port)
 {
     qRegisterMetaType<UiData>("UiData");
     qRegisterMetaType<QList<CInfo>>("QList<CInfo>");
+    qRegisterMetaType<QList<MyClient *>>("QList<MyClient *>");
     m_connected = false;
-    m_id = id;
     m_ip = ip;
     m_port = port;
-    m_ui = ui;
     m_thread = new QThread;
     m_socket = nullptr;
     m_timer  = nullptr;
 
     this->moveToThread(m_thread);
     connect(m_thread,&QThread::started,this,&MyClient::threadRun);
-    connect(m_ui,&MyTable::uiConnect,this,&MyClient::startThread);
-    connect(m_ui,&MyTable::uiSend,this,&MyClient::sendSlot);
-    connect(m_ui,&MyTable::uiQuit,this,&MyClient::quitSlot);
-//    m_thread->start();
 }
 
 MyClient::~MyClient()
@@ -50,18 +45,18 @@ MyClient::~MyClient()
 QStringList MyClient::testItems()
 {
     if(m_items.count() == 0){
-        m_items << CI_IP << CI_PORT << CI_USB << CI_GPS << CI_RS485 << CI_CAN << CI_4G << CI_RJ45 << CI_WIFI
+        m_items << CI_IP << CI_USB << CI_GPS << CI_RS485 << CI_CAN << CI_4G << CI_RJ45 << CI_WIFI
                 << CI_TF << CI_EEPROM << CI_RTCGET << CI_RTCSET << CI_TMP1 << CI_TMP2 << CI_TIME;
     }
     return m_items;
 }
 
-uint MyClient::id()
+QString MyClient::ip()
 {
-    return m_id;
+    return m_ip;
 }
 
-int MyClient::port()
+uint16_t MyClient::port()
 {
     return m_port;
 }
@@ -146,23 +141,16 @@ void MyClient::connectSlot(QList<CInfo> l)
     bool flag = false;
     int count = l.count();
     for(int i=0;i<count;i++){
-        if(l[i].id != m_id)continue;
+//        if(l[i].id != m_id)continue;
         if(l[i].port != m_port)continue;
         flag = true;
     }
     if(flag)this->startThread();
 }
 
-void MyClient::sendSlot(const char *cmd, QList<CInfo> l)
+void MyClient::sendSlot(const char *cmd, QList<MyClient *> l)
 {
-    bool flag = false;
-    int count = l.count();
-    for(int i=0;i<count;i++){
-        if(l[i].id != m_id)continue;
-        if(l[i].port != m_port)continue;
-        flag = true;
-    }
-    if(flag)this->send(cmd);
+    if(l.indexOf(this) != -1)this->send(cmd);
 }
 
 void MyClient::quitSlot(QList<CInfo> l)
@@ -170,7 +158,7 @@ void MyClient::quitSlot(QList<CInfo> l)
     bool flag = false;
     int count = l.count();
     for(int i=0;i<count;i++){
-        if(l[i].id != m_id)continue;
+//        if(l[i].id != m_id)continue;
         if(l[i].port != m_port)continue;
         flag = true;
     }

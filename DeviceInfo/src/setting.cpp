@@ -1,8 +1,10 @@
 #include "setting.h"
 
+#define CS_MODE     "mode"
 #define CS_CARD     "card"
 #define CS_EDITIP   "editIp"
 #define CS_EDITPORT "editPort"
+
 
 Setting *Setting::m_instance = nullptr;
 
@@ -16,7 +18,7 @@ Setting *Setting::ins()
 
 Setting::Setting() : QSettings("CIDI","device_info")
 {
-
+    m_mode = this->value(CS_MODE).toBool();
 }
 
 void Setting::setCard(QString str)
@@ -39,15 +41,17 @@ QString Setting::getEditIp()
     return this->value(CS_EDITIP).toString();
 }
 
-void Setting::setEditPort(QString port)
+void Setting::setMode(bool flag)
 {
-    this->setValue(CS_EDITPORT,port);
+    m_mode = flag;
+    this->setValue(CS_MODE,flag);
 }
 
-QString Setting::getEditPort()
+bool Setting::getMode()
 {
-    return this->value(CS_EDITPORT).toString();
+    return m_mode;
 }
+
 
 
 

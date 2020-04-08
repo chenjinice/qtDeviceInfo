@@ -5,11 +5,12 @@
 #include <QTimer>
 #include <QThread>
 #include "allip.h"
+#include "common.h"
 
 
 IpData::IpData()
 {
-    this->port = C_PORT;
+    this->port = C_TCPPORT;
     this->cmd = IP_NONE;
 }
 

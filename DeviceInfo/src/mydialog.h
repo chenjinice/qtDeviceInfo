@@ -4,7 +4,7 @@
 class QLineEdit;
 
 #include <QDialog>
-
+#include "common.h"
 
 class MyDialog : public QDialog
 {
@@ -15,15 +15,13 @@ public:
 
 private:
     QLineEdit *m_ipEdit;
-    QLineEdit *m_portEdit;
 
     void yesClicked();
     void noClicked();
     void ipFinished();
-    void portFinished();
 
 signals:
-    void addIp(QString ip,int port);
+    void addIp(QString ip);
 };
 
 

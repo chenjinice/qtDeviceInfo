@@ -5,7 +5,7 @@
 #include <QTableWidget>
 #include <QMap>
 #include "myclient.h"
-#include "allip.h"
+#include "common.h"
 #include "mytableitem.h"
 
 
@@ -15,13 +15,12 @@ class MyTable : public QTableWidget
 public:
     MyTable();
     ~MyTable();
-    void addClient(QList<IpData> &l);
-    void addSingleIp(QString ip,int port);
+    void addIp(QString ip);
     void clearResult();
+    void sortByIp();
 
 private:
     int                    m_ipIndex;
-    int                    m_portIndex;
     int                    m_getRtcIndex;
     int                    m_setRtcIndex;
     QMenu                * m_menu;
@@ -42,11 +41,14 @@ private:
     void getSelectedRows(QList<int> &l);
     void ActionClicked();
     void del(QList<int> &l);
+
+public slots:
     void showData(UiData data);
     void clientQuited();
 
 signals:
-    void uiSend(const char *cmd,QList<CInfo> l);
+    void uiSend(const char *cmd,QList<MyClient *> l);
+    void uiCmd(QList<MyClient *> l,UICMD cmd);
     void uiConnect(QList<CInfo> l);
     void uiQuit(QList<CInfo> l);
 };

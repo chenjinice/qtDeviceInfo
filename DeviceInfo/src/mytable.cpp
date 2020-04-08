@@ -13,7 +13,6 @@ MyTable::MyTable()
 {
     m_header = MyClient::testItems();
     m_ipIndex = m_header.indexOf(CI_IP);
-    m_portIndex = m_header.indexOf(CI_PORT);
     m_getRtcIndex = m_header.indexOf(CI_RTCGET);
     m_setRtcIndex = m_header.indexOf(CI_RTCSET);
     int cols = m_header.count();
@@ -40,7 +39,7 @@ MyTable::~MyTable()
     for(int i=0;i<this->rowCount();i++){
         CInfo c;
         QTableWidgetItem *item = this->item(i,m_ipIndex);
-        c.id = item->data(C_IDROLE).toUInt();
+        c.id = item->data(C_SORTROLE).toUInt();
         c.port = item->data(C_PORTROLE).toInt();
         clients.push_back(c);
     }
@@ -56,71 +55,18 @@ MyTable::~MyTable()
     this->clear();
 }
 
-void MyTable::addClient(QList<IpData> &l)
+void MyTable::addIp(QString ip)
 {
-    int count = l.count();
     int col = m_header.count();
-    for(int i=0;i<count;i++){
-        if(l[i].cmd != IP_ADD)continue;
-        QString ip = l[i].ip;
-        int port = l[i].port;
-        int id = l[i].id;
-        MyClient *c = new MyClient(id,ip,port,this);
-        connect(c,&MyClient::toUi,this,&MyTable::showData);
-        connect(c,&MyClient::quited,this,&MyTable::clientQuited);
-        c->startThread();
-        m_clients.append(c);
-        int row = this->rowCount();
-        this->insertRow(row);
-        for(int m=0;m<col;m++){
-            MyTableItem *item = new MyTableItem;
-            if(m == m_ipIndex){
-                item->setText(ip);
-                item->setData(C_IDROLE,id);
-                item->setData(C_PORTROLE,port);
-            }else if(m == m_portIndex){
-                item->setText(QString::number(port));
-            }
-            this->setItem(row,m,item);
-        }
-    }
-    this->sortByColumn(m_ipIndex,Qt::AscendingOrder);
-}
-
-void MyTable::addSingleIp(QString ip, int port)
-{
-    int count = m_clients.count();
-    int col = m_header.count();
-    uint id = AllIp::ipToId(ip);
-    bool flag = false;
-    for(int i=0;i<count;i++){
-        uint tmp_id = m_clients[i]->id();
-        int  tmp_port = m_clients[i]->port();
-        if(tmp_id != id)continue;
-        if(tmp_port != port)continue;
-        flag = true;
-    }
-
-    if(flag)return;
-    MyClient *c = new MyClient(id,ip,port,this);
-    connect(c,&MyClient::toUi,this,&MyTable::showData);
-    connect(c,&MyClient::quited,this,&MyTable::clientQuited);
-    c->startThread();
-    m_clients.append(c);
     int row = this->rowCount();
     this->insertRow(row);
     for(int m=0;m<col;m++){
-        MyTableItem *item = new MyTableItem;
+        MyTableItem *item = new MyTableItem(this);
         if(m == m_ipIndex){
-            item->setText(ip);
-            item->setData(C_IDROLE,id);
-            item->setData(C_PORTROLE,port);
-        }else if(m == m_portIndex){
-            item->setText(QString::number(port));
+           item->setParam(ip);
         }
         this->setItem(row,m,item);
     }
-    this->sortByColumn(m_ipIndex,Qt::AscendingOrder);
 }
 
 void MyTable::clearResult()
@@ -130,12 +76,16 @@ void MyTable::clearResult()
     for (int i=0;i<rows;i++) {
         for(int m=0;m<cols;m++){
             if(m == m_ipIndex)continue;
-            if(m == m_portIndex)continue;
             QTableWidgetItem *item = this->item(i,m);
             item->setIcon(QIcon());
             item->setText("");
         }
     }
+}
+
+void MyTable::sortByIp()
+{
+    this->sortByColumn(m_ipIndex,Qt::AscendingOrder);
 }
 
 void MyTable::createMenu()
@@ -204,18 +154,15 @@ void MyTable::ActionClicked()
 {
     QAction *s = qobject_cast<QAction *>(sender());
     QList<int> l;
-    QList<CInfo> clients;
+    QList<MyClient *> clients;
     this->getSelectedRows(l);
     for(int i=0;i<l.count();i++){
-        CInfo c;
         int row = l[i];
-        QTableWidgetItem *item = this->item(row,m_ipIndex);
-        c.id = item->data(C_IDROLE).toUInt();
-        c.port = item->data(C_PORTROLE).toInt();
-        clients.push_back(c);
+        MyTableItem *item = dynamic_cast<MyTableItem *>(this->item(row,m_ipIndex));
+        clients.push_back(item->getClient());
     }
-    if(s == m_con){emit uiConnect(clients);}
-    else if(s == m_del){emit uiQuit(clients);this->del(l);}
+    if(s == m_con){emit uiCmd(clients,UI_CONNECT);}
+    else if(s == m_del){emit uiCmd(clients,UI_QUIT);this->del(l);}
     else if(s == m_tf){emit uiSend("ttfcar",clients);}
     else if(s == m_eeprom){emit uiSend("tteeprom",clients);}
     else if(s == m_getRtc){emit uiSend("rtc-get",clients);}
@@ -240,13 +187,14 @@ void MyTable::del(QList<int> &l)
 void MyTable::showData(UiData data)
 {
     MyClient *s = qobject_cast<MyClient *>(sender());
-    uint c_id = s->id();
+//    uint c_id = s->id();
+    uint c_id = 111;
     int  c_port = s->port();
     int count = this->rowCount();
     int row = -1;
     for(int i=0;i<count;i++){
         QTableWidgetItem *item = this->item(i,m_ipIndex);
-        uint id = item->data(C_IDROLE).toUInt();
+        uint id = item->data(C_SORTROLE).toUInt();
         int port = item->data(C_PORTROLE).toInt();
         if(c_id != id)continue;
         if(c_port != port)continue;

@@ -6,7 +6,6 @@
 #include <QMutex>
 #include <QWidget>
 
-#define C_PORT  12301
 
 enum IpOperate{
     IP_NONE = 0,
@@ -33,10 +32,10 @@ class AllIp : public QObject
 public:
     AllIp();
     ~AllIp();
-    void command(QString &cmd, QString &str);
+    void   command(QString &cmd, QString &str);
     static QStringList getSelfIp();
     static uint ipToId(QString &ip);
-    void setCard(QString &card);
+    void   setCard(QString &card);
 
 private:
     int            m_count;
@@ -49,7 +48,6 @@ private:
     void sendIp(QList<IpData> &l);
     void getAllIp();
     void run();
-
 
 signals:
     void sent(QList<IpData> l);

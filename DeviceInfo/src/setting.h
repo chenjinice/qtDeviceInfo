@@ -12,12 +12,14 @@ public:
     QString getCard();
     void setEditIp(QString ip);
     QString getEditIp();
-    void setEditPort(QString port);
-    QString getEditPort();
+    void setMode(bool flag);
+    bool getMode();
 
 private:
+    bool             m_mode;
+    static Setting * m_instance;
+
     Setting();
-    static Setting *m_instance;
 };
 
 
