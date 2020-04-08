@@ -13,17 +13,8 @@
 QStringList MyClient::m_items;
 
 
-UiData::UiData()
-{
-    this->stateChanged = false;
-    this->state = false;
-}
-
 MyClient::MyClient(QString ip, uint16_t port)
 {
-    qRegisterMetaType<UiData>("UiData");
-    qRegisterMetaType<QList<CInfo>>("QList<CInfo>");
-    qRegisterMetaType<QList<MyClient *>>("QList<MyClient *>");
     m_connected = false;
     m_ip = ip;
     m_port = port;
@@ -70,7 +61,7 @@ void MyClient::threadRun()
 {
     m_timer = new QTimer;
     m_socket = new QTcpSocket;
-    m_timer->setInterval(10000);
+    m_timer->setInterval(C_RETIME);
     connect(m_timer,&QTimer::timeout,this,&MyClient::reConnect);
     connect(m_socket,&QTcpSocket::connected,this,&MyClient::sockConnected);
     connect(m_socket,&QTcpSocket::disconnected,this,&MyClient::sockDisconnected);
@@ -95,10 +86,10 @@ void MyClient::reConnect()
 void MyClient::sockConnected()
 {
     m_connected = true;
-    UiData data;
-    data.stateChanged = true;
-    data.state = true;
-    emit toUi(data);
+    ToUiData d;
+    d.stateChanged = true;
+    d.state = true;
+    emit toUi(d);
 
     if(m_timer)m_timer->stop();
     this->send("ttuv2x");
@@ -107,10 +98,10 @@ void MyClient::sockConnected()
 void MyClient::sockDisconnected()
 {
     m_connected = false;
-    UiData data;
-    data.stateChanged = true;
-    data.state = false;
-    emit toUi(data);
+    ToUiData d;
+    d.stateChanged = true;
+    d.state = false;
+    emit toUi(d);
 
     if(m_timer)m_timer->start();
 }
@@ -132,39 +123,26 @@ void MyClient::quitConnection()
 
 void MyClient::send(const char *cmd)
 {
-//    qDebug() << "send";
     if(m_connected)m_socket->write(cmd,strlen(cmd));
 }
 
-void MyClient::connectSlot(QList<CInfo> l)
+void MyClient::getUiCmd(UiCmdData d)
 {
-    bool flag = false;
-    int count = l.count();
-    for(int i=0;i<count;i++){
-//        if(l[i].id != m_id)continue;
-        if(l[i].port != m_port)continue;
-        flag = true;
-    }
-    if(flag)this->startThread();
-}
-
-void MyClient::sendSlot(const char *cmd, QList<MyClient *> l)
-{
-    if(l.indexOf(this) != -1)this->send(cmd);
-}
-
-void MyClient::quitSlot(QList<CInfo> l)
-{
-    bool flag = false;
-    int count = l.count();
-    for(int i=0;i<count;i++){
-//        if(l[i].id != m_id)continue;
-        if(l[i].port != m_port)continue;
-        flag = true;
-    }
-    if(flag){
+    int index = d.l.indexOf(this);
+    if((!d.all) && (index == -1))return;
+    switch (d.cmd) {
+    case UI_CONNECT:
+        this->startThread();
+        break;
+    case UI_SEND:
+        if(d.str != nullptr)this->send(d.str);
+        break;
+    case UI_QUIT:
         this->quitConnection();
         emit quited();
+        break;
+    default:
+        break;
     }
 }
 
@@ -180,34 +158,25 @@ void MyClient::parseData(QString &str)
 {
     QString pre1 = "-----";
     QString pre2 = "=================";
-    UiData data;
+    ToUiData data;
     QStringList lines = str.remove("\r").split("\n");
     int line_count = lines.count();
-    bool flag = false;
     for(int i=0;i<line_count;i++){
         if(lines[i].indexOf(pre1) == 0){
-            flag |= this->parsePre1(lines[i],pre1.length(),data);
+            this->parsePre1(lines[i],pre1.length(),data);
         }else if(lines[i].indexOf(pre2) == 0){
-            flag |= this->parsePre2(lines[i],pre2.length(),data);
+            this->parsePre2(lines[i],pre2.length(),data);
         }
     }
-    if(flag)emit toUi(data);
-//    qDebug() << "-------------------";
-//    QMapIterator<int,bool> it(data.b);
-//    QMapIterator<int,QString> it2(data.text);
-//    while(it.hasNext()){
-//        qDebug() << it.next().key() << " -- " << it.value();
-//    }
-//    while(it2.hasNext()){
-//        qDebug() << it2.next().key() << " --- " << it2.value();
-//    }
-
+    if(data.l.count() > 0)emit toUi(data);
 }
 
-bool MyClient::parsePre1(QString &str, int len, UiData &data)
+bool MyClient::parsePre1(QString &str, int len, ToUiData &d)
 {
     bool ret = false;
     bool value = false;
+    ItemData idata;
+    idata.hasFlag = true;
     QStringList array = str.mid(len).replace(QRegExp("[\\s]+")," ").split(" ");
     if(array.length() < 2)return ret;
     QString result = array[0].mid(0,array[0].indexOf("."));
@@ -215,28 +184,31 @@ bool MyClient::parsePre1(QString &str, int len, UiData &data)
     int index = m_items.indexOf(item);
     if(index == -1)return ret;
     if(result.compare(C_OK,Qt::CaseInsensitive) == 0)value = true;
-    data.b[index] = value;
+    idata.column = index;
+    idata.flag = value;
 
     if((item == CI_RTCGET) || (item == CI_RTCSET)){
         int count = array.length()-2;
         QString text;
         for(int i=2;i<count;i++){text += array[i];if(i < count -1)text += " ";}
-        data.text[index] = text;
+        idata.text = text;
         bool flag = false;
         if(count >= 7){
             QString time_str = array[6]+" "+array[3]+" "+array[4]+" "+array[5];
             flag = this->checkTime(time_str);
         }
-        data.b[index] = flag;
+        idata.flag = flag;
     }
+    d.l.append(idata);
     return true;
 }
 
-bool MyClient::parsePre2(QString &str, int len, UiData &data)
+bool MyClient::parsePre2(QString &str, int len, ToUiData &d)
 {
-    int index;
     QString text;
+    ItemData idata;
     bool ret = false;
+    int index= -1;
     QStringList array = str.mid(len).split(" ");
     if(array.length() < 2)return ret;
 
@@ -244,21 +216,29 @@ bool MyClient::parsePre2(QString &str, int len, UiData &data)
     if(index != -1){
         if(array.length() > 2)text += array[2];
         if(array.length() > 3)text +=" " + array[3];
-        data.text.insert(index,text);
+        idata.column = index;
+        idata.text = text;
+        d.l.append(idata);
         ret = true;
     }
     index = m_items.indexOf(CI_TMP1);
     if(index != -1){
+        index = m_items.indexOf(CI_TMP1);
         double temp1 = array[0].toInt()/1000.0;
         text = QString::number(temp1,'f',3);
-        data.text.insert(index,text);
+        idata.column = index;
+        idata.text = text;
+        d.l.append(idata);
         ret = true;
     }
     index = m_items.indexOf(CI_TMP2);
     if(index != -1){
+        index = m_items.indexOf(CI_TMP2);
         double temp2 = array[1].toInt()/1000.0;
         text = QString::number(temp2,'f',3);
-        data.text.insert(index,text);
+        idata.column = index;
+        idata.text = text;
+        d.l.append(idata);
         ret = true;
     }
     return true;
@@ -271,7 +251,6 @@ bool MyClient::checkTime(QString &str)
     QDateTime d = locale.toDateTime(str,"yyyy MMM dd hh:mm:ss");
     QDateTime current = QDateTime::currentDateTime();
     qint64 seconds = qAbs(d.secsTo(current));
-    qDebug() << "seconds = " << seconds;
     if(seconds < 120)flag = true;
     return flag;
 }

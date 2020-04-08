@@ -12,6 +12,7 @@ class QTimer;
 #include <QTcpSocket>
 #include <QThread>
 #include <QMap>
+#include "common.h"
 
 
 #define C_OK        "ok"
@@ -33,23 +34,6 @@ class QTimer;
 #define CI_TIME     "设备时间"
 
 
-
-class UiData{
-public:
-    UiData();
-    bool              stateChanged;
-    bool              state;
-    QMap<int,bool>    b;
-    QMap<int,QString> text;
-};
-
-class CInfo
-{
-public:
-    uint id;
-    int  port;
-};
-
 class MyClient : public QObject
 {
     Q_OBJECT
@@ -59,6 +43,7 @@ public:
     static QStringList testItems();
     QString ip();
     uint16_t port();
+    void startThread();
 
 private:
     static QStringList m_items;
@@ -75,21 +60,18 @@ private:
     void sockDisconnected();
     void quitConnection();
     void send(const char * cmd);
-    void connectSlot(QList<CInfo> l);
     void sockReadData();
     void parseData(QString &str);
-    bool parsePre1(QString &str, int len,UiData &data);
-    bool parsePre2(QString &str, int len,UiData &data);
+    bool parsePre1(QString &str, int len,ToUiData &d);
+    bool parsePre2(QString &str, int len, ToUiData &d);
     bool checkTime(QString &str);
     void saveLog(QString &str);
 
 public slots:
-    void startThread();
-    void sendSlot(const char *cmd, QList<MyClient *> l);
-    void quitSlot(QList<CInfo> l);
+    void getUiCmd(UiCmdData d);
 
 signals:
-    void toUi(UiData data);
+    void toUi(ToUiData d);
     void quited();
 
 };

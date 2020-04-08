@@ -11,6 +11,8 @@
 
 MyTable::MyTable()
 {
+    qRegisterMetaType<UiCmdData>("UiCmdData");
+    qRegisterMetaType<ToUiData>("ToUiData");
     m_header = MyClient::testItems();
     m_ipIndex = m_header.indexOf(CI_IP);
     m_getRtcIndex = m_header.indexOf(CI_RTCGET);
@@ -35,15 +37,11 @@ MyTable::MyTable()
 
 MyTable::~MyTable()
 {
-    QList<CInfo> clients;
-    for(int i=0;i<this->rowCount();i++){
-        CInfo c;
-        QTableWidgetItem *item = this->item(i,m_ipIndex);
-        c.id = item->data(C_SORTROLE).toUInt();
-        c.port = item->data(C_PORTROLE).toInt();
-        clients.push_back(c);
-    }
-    emit uiQuit(clients);
+    UiCmdData data;
+    data.all = true;
+    data.cmd = UI_QUIT;
+    emit uiCmd(data);
+
     int rows = this->rowCount();
     int cols = this->columnCount();
     for (int i=0;i<rows;i++) {
@@ -67,6 +65,15 @@ void MyTable::addIp(QString ip)
         }
         this->setItem(row,m,item);
     }
+}
+
+void MyTable::connectAll()
+{
+    UiCmdData data;
+    data.all = true;
+    data.cmd = UI_CONNECT;
+    emit uiCmd(data);
+    qDebug() << "1111111111";
 }
 
 void MyTable::clearResult()
@@ -123,22 +130,6 @@ void MyTable::showContextMenu(const QPoint &pos)
     m_menu->exec(QCursor::pos());
 }
 
-void MyTable::setBoolIcon(QTableWidgetItem *item, bool flag)
-{
-    static QIcon yes(":/icon/image/yes.png");
-    static QIcon no(":/icon/image/no.png");
-    if(flag)item->setIcon(yes);
-    else item->setIcon(no);
-}
-
-void MyTable::setConnectIcon(QTableWidgetItem *item, bool flag)
-{
-    static QIcon c_yes(":/icon/image/connect_yes.png");
-    static QIcon c_no(":/icon/image/connect_no.png");
-    if(flag)item->setIcon(c_yes);
-    else item->setIcon(c_no);
-}
-
 void MyTable::getSelectedRows(QList<int> &l)
 {
     const QList<QTableWidgetItem*> &items= this->selectedItems();
@@ -154,20 +145,21 @@ void MyTable::ActionClicked()
 {
     QAction *s = qobject_cast<QAction *>(sender());
     QList<int> l;
-    QList<MyClient *> clients;
+    UiCmdData d;
     this->getSelectedRows(l);
     for(int i=0;i<l.count();i++){
         int row = l[i];
         MyTableItem *item = dynamic_cast<MyTableItem *>(this->item(row,m_ipIndex));
-        clients.push_back(item->getClient());
+        d.l.push_back(item->getClient());
     }
-    if(s == m_con){emit uiCmd(clients,UI_CONNECT);}
-    else if(s == m_del){emit uiCmd(clients,UI_QUIT);this->del(l);}
-    else if(s == m_tf){emit uiSend("ttfcar",clients);}
-    else if(s == m_eeprom){emit uiSend("tteeprom",clients);}
-    else if(s == m_getRtc){emit uiSend("rtc-get",clients);}
-    else if(s == m_setRtc){emit uiSend("rtc-update",clients);}
-    else if(s == m_factory){emit uiSend("refactory force",clients);}
+    if(s == m_con){d.cmd = UI_CONNECT;}
+    else if(s == m_del){d.cmd = UI_QUIT;this->del(l);}
+    else if(s == m_tf){d.cmd = UI_SEND;d.str = "ttfcar";}
+    else if(s == m_eeprom){d.cmd = UI_SEND;d.str = "tteeprom";}
+    else if(s == m_getRtc){d.cmd = UI_SEND;d.str = "rtc-get";}
+    else if(s == m_setRtc){d.cmd = UI_SEND;d.str = "rtc-update";}
+    else if(s == m_factory){d.cmd = UI_SEND;d.str = "refactory force";}
+    emit uiCmd(d);
 }
 
 void MyTable::del(QList<int> &l)
@@ -184,49 +176,41 @@ void MyTable::del(QList<int> &l)
     }
 }
 
-void MyTable::showData(UiData data)
+void MyTable::showData(ToUiData d)
 {
     MyClient *s = qobject_cast<MyClient *>(sender());
-//    uint c_id = s->id();
-    uint c_id = 111;
-    int  c_port = s->port();
     int count = this->rowCount();
     int row = -1;
     for(int i=0;i<count;i++){
-        QTableWidgetItem *item = this->item(i,m_ipIndex);
-        uint id = item->data(C_SORTROLE).toUInt();
-        int port = item->data(C_PORTROLE).toInt();
-        if(c_id != id)continue;
-        if(c_port != port)continue;
-        row = i;
-    }
-    if(row == -1)return;
-    QMapIterator<int,bool> it(data.b);
-    QMapIterator<int,QString> it2(data.text);
-    if(data.stateChanged)this->setConnectIcon(this->item(row,m_ipIndex),data.state);
-    while(it.hasNext()){
-        int col = it.next().key();
-        bool value = it.value();
-        QTableWidgetItem *item = this->item(row,col);
-        this->setBoolIcon(item,value);
-        if(!value){
-            int err = item->data(C_ERRROLE).toInt()+1;
-            item->setData(C_ERRROLE,err);
-            if((col!=m_getRtcIndex) && (col!=m_setRtcIndex))item->setData(0,err);
+        MyTableItem *item = dynamic_cast<MyTableItem *>(this->item(i,m_ipIndex));
+        if(item->getClient() == s){
+            if(d.stateChanged)item->setConnectIcon(d.state);
+            row = i;
         }
     }
-    while(it2.hasNext()){
-        this->item(row,it2.next().key())->setText(it2.value());
+    if(row == -1)return;
+
+    int l_count = d.l.count();
+    for(int m=0;m<l_count;m++){
+        const ItemData &idata = d.l[m];
+        int col = idata.column;
+        QString text;
+        MyTableItem *item = dynamic_cast<MyTableItem *>(this->item(row,col));
+        if(item == nullptr)continue;
+        if(idata.hasFlag)item->setBoolIcon(idata.flag);
+        uint err = item->getErr();
+        if(!idata.text.isEmpty())text+=idata.text;
+        if((err > 0) && (col!=m_getRtcIndex) && (col!=m_setRtcIndex) ){
+            text += "┏" + QString::number(err) + "┛";
+        }
+        item->setText(text);
     }
 }
 
 void MyTable::clientQuited()
 {
     MyClient *s = qobject_cast<MyClient *>(sender());
-    m_clients.removeOne(s);
     delete s;
 }
-
-
 
 

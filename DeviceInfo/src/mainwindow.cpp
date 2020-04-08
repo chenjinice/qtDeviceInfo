@@ -115,7 +115,10 @@ void MainWindow::addClicked()
 void MainWindow::checkBoxChanged(int value)
 {
     bool flag = false;
-    if(value > 0)flag = true;
+    if(value > 0){
+        flag = true;
+        m_table->connectAll();
+    }
     Setting::ins()->setMode(flag);
 }
 

@@ -16,6 +16,7 @@ public:
     MyTable();
     ~MyTable();
     void addIp(QString ip);
+    void connectAll();
     void clearResult();
     void sortByIp();
 
@@ -32,25 +33,19 @@ private:
     QAction              * m_del;
     QAction              * m_factory;
     QStringList            m_header;
-    QList<MyClient *>      m_clients;
 
     void createMenu();
     void showContextMenu(const QPoint &pos);
-    void setBoolIcon(QTableWidgetItem *item,bool flag);
-    void setConnectIcon(QTableWidgetItem *item,bool flag);
     void getSelectedRows(QList<int> &l);
     void ActionClicked();
     void del(QList<int> &l);
 
 public slots:
-    void showData(UiData data);
+    void showData(ToUiData d);
     void clientQuited();
 
 signals:
-    void uiSend(const char *cmd,QList<MyClient *> l);
-    void uiCmd(QList<MyClient *> l,UICMD cmd);
-    void uiConnect(QList<CInfo> l);
-    void uiQuit(QList<CInfo> l);
+    void uiCmd(UiCmdData d);
 };
 
 #endif // MYTABLE_H

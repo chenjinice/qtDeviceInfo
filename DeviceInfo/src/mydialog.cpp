@@ -39,6 +39,11 @@ MyDialog::~MyDialog()
 
 void MyDialog::yesClicked()
 {
+//    for(int i=0;i<50;i++){
+//        QString str = "127.0.0.1";
+//        emit addIp(str);
+//    }
+
     QString ip = m_ipEdit->text();
     emit addIp(ip);
     this->hide();

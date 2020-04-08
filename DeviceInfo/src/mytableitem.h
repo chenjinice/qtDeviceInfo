@@ -21,6 +21,9 @@ public:
     MyTableItem(MyTable *ui);
     ~MyTableItem();
     void setParam(QString &ip);
+    void setBoolIcon(bool flag);
+    void setConnectIcon(bool flag);
+    uint getErr();
     MyClient *getClient();
     bool operator < (const MyTableItem &other) const;
 
