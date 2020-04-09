@@ -15,7 +15,6 @@ MyTableItem::MyTableItem(MyTable *ui)
 
 MyTableItem::~MyTableItem()
 {
-
 }
 
 void MyTableItem::setParam(QString &ip)
@@ -28,10 +27,7 @@ void MyTableItem::setParam(QString &ip)
     m_client = new MyClient(ip,port);
     QObject::connect(m_ui,&MyTable::uiCmd,m_client,&MyClient::getUiCmd);
     QObject::connect(m_client,&MyClient::toUi,m_ui,&MyTable::showData);
-    QObject::connect(m_client,&MyClient::quited,m_ui,&MyTable::clientQuited);
-    if(Setting::ins()->getMode()){
-        m_client->startThread();
-    }
+    QObject::connect(m_client,&MyClient::clientDeleted,m_ui,&MyTable::getClientdeleted);
 }
 
 void MyTableItem::setBoolIcon(bool flag)

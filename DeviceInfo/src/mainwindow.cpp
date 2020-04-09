@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->createButton();
     m_layout->addWidget(m_table);
     this->setMinimumSize(1000,500);
-    this->setWindowTitle("测试软件 - V2020.04.08");
+    this->setWindowTitle("测试软件 - V2020.04.09");
 }
 
 MainWindow::~MainWindow()
@@ -49,7 +49,8 @@ void MainWindow::createCombo()
     QStringList l = getSelfIp();
     QLabel *label_card     = new QLabel("Udp ：");
     m_labelState           = new QLabel;
-    m_labelState->setFixedWidth(15);
+    m_labelState->setFixedSize(15,15);
+    m_labelState->setScaledContents(true);
     QComboBox *combo = new QComboBox;
     for(int i=0;i<l.count();i++){
         combo->addItem(l.at(i));
@@ -92,9 +93,10 @@ void MainWindow::createButton()
 
 void MainWindow::udpState(bool flag)
 {
-    QString color = "background-color: rgb(255,0,0);border-radius:6px;";
-    if(flag)color = "background-color: rgb(0,255,0);border-radius:6px;";
-    m_labelState->setStyleSheet(color);
+    static QPixmap yes(":/icon/image/connect_yes.png");
+    static QPixmap no(":/icon/image/connect_no.png");
+    if(flag)m_labelState->setPixmap(yes);
+    else m_labelState->setPixmap(no);
 }
 
 void MainWindow::clearClicked()
@@ -109,6 +111,7 @@ void MainWindow::addClicked()
         s_dialog = new MyDialog;
         connect(s_dialog,&MyDialog::addIp,m_table,&MyTable::addIp);
     }
+    s_dialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     s_dialog->show();
 }
 

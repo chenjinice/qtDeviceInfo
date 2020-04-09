@@ -26,6 +26,7 @@ private:
     int                    m_setRtcIndex;
     QMenu                * m_menu;
     QAction              * m_con;
+    QAction              * m_disCon;
     QAction              * m_tf;
     QAction              * m_eeprom;
     QAction              * m_getRtc;
@@ -42,7 +43,7 @@ private:
 
 public slots:
     void showData(ToUiData d);
-    void clientQuited();
+    void getClientdeleted();
 
 signals:
     void uiCmd(UiCmdData d);

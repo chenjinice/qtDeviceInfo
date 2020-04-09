@@ -13,7 +13,7 @@ MyTable::MyTable()
 {
     qRegisterMetaType<UiCmdData>("UiCmdData");
     qRegisterMetaType<ToUiData>("ToUiData");
-    m_header = MyClient::testItems();
+    m_header = getTestItems();
     m_ipIndex = m_header.indexOf(CI_IP);
     m_getRtcIndex = m_header.indexOf(CI_RTCGET);
     m_setRtcIndex = m_header.indexOf(CI_RTCSET);
@@ -39,7 +39,7 @@ MyTable::~MyTable()
 {
     UiCmdData data;
     data.all = true;
-    data.cmd = UI_QUIT;
+    data.cmd = UI_DELETE;
     emit uiCmd(data);
 
     int rows = this->rowCount();
@@ -73,7 +73,6 @@ void MyTable::connectAll()
     data.all = true;
     data.cmd = UI_CONNECT;
     emit uiCmd(data);
-    qDebug() << "1111111111";
 }
 
 void MyTable::clearResult()
@@ -99,6 +98,7 @@ void MyTable::createMenu()
 {
     m_menu = new QMenu(this);
     m_con = new QAction("连接");
+    m_disCon = new QAction("断开");
     m_tf  = new QAction("测tf");
     m_eeprom = new QAction("测eeprom");
     m_getRtc = new QAction("获取RTC");
@@ -111,6 +111,7 @@ void MyTable::createMenu()
     m_menu->addAction(m_setRtc);
     m_menu->addSeparator();
     m_menu->addAction(m_con);
+    m_menu->addAction(m_disCon);
     m_menu->addAction(m_del);
     m_menu->addSeparator();
 //    m_menu->addAction(m_factory);
@@ -120,6 +121,7 @@ void MyTable::createMenu()
     connect(m_getRtc,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_setRtc,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_con,&QAction::triggered,this,&MyTable::ActionClicked);
+    connect(m_disCon,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_del,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_factory,&QAction::triggered,this,&MyTable::ActionClicked);
 }
@@ -150,10 +152,11 @@ void MyTable::ActionClicked()
     for(int i=0;i<l.count();i++){
         int row = l[i];
         MyTableItem *item = dynamic_cast<MyTableItem *>(this->item(row,m_ipIndex));
-        d.l.push_back(item->getClient());
+        d.l.append(item->getClient());
     }
     if(s == m_con){d.cmd = UI_CONNECT;}
-    else if(s == m_del){d.cmd = UI_QUIT;this->del(l);}
+    else if(s == m_disCon){d.cmd = UI_DISCONNECT;}
+    else if(s == m_del){d.cmd = UI_DELETE;this->del(l);}
     else if(s == m_tf){d.cmd = UI_SEND;d.str = "ttfcar";}
     else if(s == m_eeprom){d.cmd = UI_SEND;d.str = "tteeprom";}
     else if(s == m_getRtc){d.cmd = UI_SEND;d.str = "rtc-get";}
@@ -201,13 +204,13 @@ void MyTable::showData(ToUiData d)
         uint err = item->getErr();
         if(!idata.text.isEmpty())text+=idata.text;
         if((err > 0) && (col!=m_getRtcIndex) && (col!=m_setRtcIndex) ){
-            text += "┏" + QString::number(err) + "┛";
+            text += "<" + QString::number(err) + ">";
         }
         item->setText(text);
     }
 }
 
-void MyTable::clientQuited()
+void MyTable::getClientdeleted()
 {
     MyClient *s = qobject_cast<MyClient *>(sender());
     delete s;
