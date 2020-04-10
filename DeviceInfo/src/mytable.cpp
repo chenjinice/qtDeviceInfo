@@ -7,6 +7,7 @@
 #include "mytable.h"
 #include "mytableitem.h"
 #include "myclient.h"
+#include "setting.h"
 
 
 MyTable::MyTable()
@@ -15,7 +16,6 @@ MyTable::MyTable()
     qRegisterMetaType<ToUiData>("ToUiData");
     m_header = getTestItems();
     m_ipIndex = m_header.indexOf(CI_IP);
-    m_getRtcIndex = m_header.indexOf(CI_RTCGET);
     m_setRtcIndex = m_header.indexOf(CI_RTCSET);
     int cols = m_header.count();
     this->createMenu();
@@ -25,10 +25,10 @@ MyTable::MyTable()
     this->setRowCount(0);
     this->setHorizontalHeaderLabels(m_header);
     this->horizontalHeader()->setStyleSheet("QHeaderView{border:0;border-bottom:1px solid #000;}");
-//    this->horizontalHeader()->setStretchLastSection(true);
-    this ->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->horizontalHeader()->setStretchLastSection(true);
+//    this ->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    this->horizontalHeader()->setSectionResizeMode(m_header.indexOf(CI_LTEVRX), QHeaderView::ResizeToContents);
     this->horizontalHeader()->setSectionResizeMode(m_ipIndex, QHeaderView::ResizeToContents);
-    this->horizontalHeader()->setSectionResizeMode(m_getRtcIndex, QHeaderView::ResizeToContents);
     this->horizontalHeader()->setSectionResizeMode(m_setRtcIndex, QHeaderView::ResizeToContents);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -64,6 +64,9 @@ void MyTable::addIp(QString ip)
            item->setParam(ip);
         }
         this->setItem(row,m,item);
+    }
+    if(Setting::ins()->getAutoSort()){
+        this->sortByIp();
     }
 }
 
@@ -103,16 +106,22 @@ void MyTable::createMenu()
     m_eeprom = new QAction("测eeprom");
     m_getRtc = new QAction("获取RTC");
     m_setRtc = new QAction("更新RTC");
+    m_ledOn  = new QAction("灯亮");
+    m_ledOff = new QAction("灯灭");
+    m_ledFlash  = new QAction("灯闪烁");
     m_del = new QAction("删除");
     m_factory = new QAction("恢复出厂设置");
     m_menu->addAction(m_tf);
     m_menu->addAction(m_eeprom);
-    m_menu->addAction(m_getRtc);
+//    m_menu->addAction(m_getRtc);
     m_menu->addAction(m_setRtc);
+    m_menu->addAction(m_ledOn);
+    m_menu->addAction(m_ledOff);
+    m_menu->addAction(m_ledFlash);
     m_menu->addSeparator();
     m_menu->addAction(m_con);
     m_menu->addAction(m_disCon);
-    m_menu->addAction(m_del);
+//    m_menu->addAction(m_del);
     m_menu->addSeparator();
 //    m_menu->addAction(m_factory);
 //    m_factory->setEnabled(false);
@@ -120,6 +129,9 @@ void MyTable::createMenu()
     connect(m_eeprom,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_getRtc,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_setRtc,&QAction::triggered,this,&MyTable::ActionClicked);
+    connect(m_ledOn,&QAction::triggered,this,&MyTable::ActionClicked);
+    connect(m_ledOff,&QAction::triggered,this,&MyTable::ActionClicked);
+    connect(m_ledFlash,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_con,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_disCon,&QAction::triggered,this,&MyTable::ActionClicked);
     connect(m_del,&QAction::triggered,this,&MyTable::ActionClicked);
@@ -128,7 +140,7 @@ void MyTable::createMenu()
 
 void MyTable::showContextMenu(const QPoint &pos)
 {
-    qDebug() << pos;
+//    qDebug() << pos;
     m_menu->exec(QCursor::pos());
 }
 
@@ -157,11 +169,14 @@ void MyTable::ActionClicked()
     if(s == m_con){d.cmd = UI_CONNECT;}
     else if(s == m_disCon){d.cmd = UI_DISCONNECT;}
     else if(s == m_del){d.cmd = UI_DELETE;this->del(l);}
-    else if(s == m_tf){d.cmd = UI_SEND;d.str = "ttfcar";}
-    else if(s == m_eeprom){d.cmd = UI_SEND;d.str = "tteeprom";}
-    else if(s == m_getRtc){d.cmd = UI_SEND;d.str = "rtc-get";}
-    else if(s == m_setRtc){d.cmd = UI_SEND;d.str = "rtc-update";}
-    else if(s == m_factory){d.cmd = UI_SEND;d.str = "refactory force";}
+    else if(s == m_tf){d.cmd = UI_SEND;d.str = CC_TF;}
+    else if(s == m_eeprom){d.cmd = UI_SEND;d.str = CC_EEPROM;}
+    else if(s == m_getRtc){d.cmd = UI_SEND;d.str = CC_GETRTC;}
+    else if(s == m_setRtc){d.cmd = UI_SEND;d.str = CC_SETRTC;}
+    else if(s == m_ledOn){d.cmd = UI_SEND;d.str = CC_LEDON;}
+    else if(s == m_ledOff){d.cmd = UI_SEND;d.str = CC_LEDOFF;}
+    else if(s == m_ledFlash){d.cmd = UI_SEND;d.str = CC_LEDFLASH;}
+    else if(s == m_factory){d.cmd = UI_SEND;d.str = CC_FACTORY;}
     emit uiCmd(d);
 }
 
@@ -202,8 +217,8 @@ void MyTable::showData(ToUiData d)
         if(item == nullptr)continue;
         if(idata.hasFlag)item->setBoolIcon(idata.flag);
         uint err = item->getErr();
-        if(!idata.text.isEmpty())text+=idata.text;
-        if((err > 0) && (col!=m_getRtcIndex) && (col!=m_setRtcIndex) ){
+        if(!idata.text.isEmpty())text+=idata.text + " ";
+        if((err > 0) && (col!=m_setRtcIndex) ){
             text += "<" + QString::number(err) + ">";
         }
         item->setText(text);

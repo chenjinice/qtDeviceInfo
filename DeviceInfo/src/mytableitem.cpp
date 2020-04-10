@@ -28,6 +28,7 @@ void MyTableItem::setParam(QString &ip)
     QObject::connect(m_ui,&MyTable::uiCmd,m_client,&MyClient::getUiCmd);
     QObject::connect(m_client,&MyClient::toUi,m_ui,&MyTable::showData);
     QObject::connect(m_client,&MyClient::clientDeleted,m_ui,&MyTable::getClientdeleted);
+//    qDebug() << ip << ":" << m_sortId;
 }
 
 void MyTableItem::setBoolIcon(bool flag)
@@ -60,8 +61,10 @@ MyClient *MyTableItem::getClient()
     return m_client;
 }
 
-bool MyTableItem::operator <(const MyTableItem &other) const
+bool MyTableItem::operator <(const QTableWidgetItem &other) const
 {
-    uint that_id = other.m_sortId;
+    const MyTableItem *item =  dynamic_cast<const MyTableItem *>(&other);
+    uint that_id = item->m_sortId;
     return m_sortId < that_id;
 }
+

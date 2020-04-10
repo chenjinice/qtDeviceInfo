@@ -37,8 +37,8 @@ QStringList getSelfIp()
 QStringList getTestItems()
 {
     if(g_items.count() == 0){
-        g_items << CI_IP << CI_USB << CI_GPS << CI_RS485 << CI_CAN << CI_4G << CI_RJ45 << CI_WIFI
-                << CI_TF << CI_EEPROM << CI_RTCGET << CI_RTCSET << CI_TMP1 << CI_TMP2 << CI_TIME;
+        g_items << CI_IP << CI_LTEVRX   << CI_USB << CI_GPS << CI_RS485 << CI_CAN << CI_4G << CI_RJ45 << CI_WIFI
+                << CI_TF << CI_EEPROM << CI_RTCSET << CI_TMP1 << CI_TMP2 << CI_TIME;
     }
     return g_items;
 }

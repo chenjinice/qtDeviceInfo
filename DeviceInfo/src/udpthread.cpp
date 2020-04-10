@@ -1,5 +1,6 @@
 #include <QThread>
 #include <QUdpSocket>
+#include <QTimer>
 #include <QDebug>
 #include "udpthread.h"
 #include "mainwindow.h"
@@ -27,6 +28,7 @@ void UdpThread::startThread(QString &ip)
 UdpThread::UdpThread()
 {
     m_udp = nullptr;
+    m_timer  = nullptr;
     m_ip  = "127.0.0.1";
     m_thread = new QThread;
     this->moveToThread(m_thread);
@@ -35,6 +37,10 @@ UdpThread::UdpThread()
 
 UdpThread::~UdpThread()
 {
+    if(m_timer){
+        m_timer->stop();
+        delete m_timer;
+    }
     m_thread->quit();
     m_thread->wait();
     delete m_thread;
@@ -53,9 +59,12 @@ void UdpThread::setIp(QString ip)
 
 void UdpThread::threadRun()
 {
+    m_timer = new QTimer;
+    m_timer->setInterval(C_UDPTIME);
     m_udp = new QUdpSocket;
-    this->bindIp();
     connect(m_udp, &QUdpSocket::readyRead, this, &UdpThread::readData);
+    connect(m_timer,&QTimer::timeout,this,&UdpThread::bindIp);
+    this->bindIp();
 }
 
 void UdpThread::bindIp()
@@ -63,6 +72,8 @@ void UdpThread::bindIp()
     if(!m_udp)return;
     m_udp->close();
     bool flag = m_udp->bind(QHostAddress(m_ip), C_UDPPORT);
+    if(flag)m_timer->stop();
+    else m_timer->start();
     emit bindState(flag);
 }
 

@@ -19,7 +19,7 @@ public:
     void setConnectIcon(bool flag);
     uint getErr();
     MyClient *getClient();
-    bool operator < (const MyTableItem &other) const;
+    bool operator < (const QTableWidgetItem &other) const;
 
 private:
     MyTable     * m_ui;

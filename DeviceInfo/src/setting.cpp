@@ -3,7 +3,7 @@
 #define CS_MODE     "mode"
 #define CS_CARD     "card"
 #define CS_EDITIP   "editIp"
-#define CS_EDITPORT "editPort"
+#define CS_SORT     "autoSort"
 
 
 Setting *Setting::m_instance = nullptr;
@@ -18,7 +18,7 @@ Setting *Setting::ins()
 
 Setting::Setting() : QSettings("CIDI","device_info")
 {
-    m_mode = this->value(CS_MODE).toBool();
+    this->setValue(CS_MODE,true);
 }
 
 void Setting::setCard(QString str)
@@ -43,13 +43,22 @@ QString Setting::getEditIp()
 
 void Setting::setMode(bool flag)
 {
-    m_mode = flag;
     this->setValue(CS_MODE,flag);
 }
 
 bool Setting::getMode()
 {
-    return m_mode;
+    return this->value(CS_MODE).toBool();
+}
+
+void Setting::setAutoSort(bool flag)
+{
+    this->setValue(CS_SORT,flag);
+}
+
+bool Setting::getAutoSort()
+{
+    return this->value(CS_SORT).toBool();
 }
 
 

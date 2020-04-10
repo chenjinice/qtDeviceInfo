@@ -103,7 +103,7 @@ void MyClient::sockConnected()
     d.state = true;
     emit toUi(d);
     if(m_timer)m_timer->stop();
-    this->send("ttuv2x");
+    this->send(CC_ALL);
 }
 
 void MyClient::sockDisconnected()
@@ -210,7 +210,9 @@ bool MyClient::parsePre1(QString &str, ToUiData &d)
 
     if(item == CI_4G){
         QStringList arr = str.split("=");
-        if(arr.count() > 1)idata.text = arr[1]+"ms";
+        if(arr.count() > 1)idata.text = arr[1]+" ms";
+    }else if(item == CI_LTEVRX) {
+         idata.text = this->getLtevrxText(str);
     }else if((item == CI_RTCGET) || (item == CI_RTCSET)){
         int count = array.length()-2;
         QString text;
@@ -247,7 +249,7 @@ bool MyClient::parsePre2(QString &str, ToUiData &d)
     if(index != -1){
         ItemData idata;
         idata.column = index;
-        double temp1 = array[0].toInt()/1000.0;
+        double temp1 = array[1].toInt()/1000.0;
         idata.text = QString::number(temp1,'f',3);
         d.l.append(idata);
         ret = true;
@@ -256,7 +258,7 @@ bool MyClient::parsePre2(QString &str, ToUiData &d)
     if(index != -1){
         ItemData idata;
         idata.column = index;
-        double temp2 = array[1].toInt()/1000.0;
+        double temp2 = array[0].toInt()/1000.0;
         idata.text = QString::number(temp2,'f',3);
         d.l.append(idata);
         ret = true;
@@ -264,12 +266,30 @@ bool MyClient::parsePre2(QString &str, ToUiData &d)
     return true;
 }
 
+QString MyClient::getLtevrxText(QString &str)
+{
+    QString arr = "arr:", ct = "ct:" , text;
+    int arr_index = str.indexOf(arr);
+    int d_index = str.indexOf(",");
+    int ct_index =str.indexOf(ct);
+
+    int len = d_index-arr_index;
+    if((d_index!=-1)&&(arr_index!=-1)&&(len>0)){
+        text += str.mid(arr_index,len).trimmed()+",";
+    }
+    if(ct_index!=-1){
+        text += str.mid(ct_index).trimmed();
+    }
+    return text;
+}
+
 bool MyClient::checkTime(QString &str)
 {
     bool flag = false;
     QLocale locale = QLocale::English;
     QDateTime d = locale.toDateTime(str,"yyyy MMM dd hh:mm:ss");
-    QDateTime current = QDateTime::currentDateTime();
+    d.setTimeSpec(Qt::UTC);
+    QDateTime current = QDateTime::currentDateTime().toUTC();
     qint64 seconds = qAbs(d.secsTo(current));
     if(seconds < 120)flag = true;
     return flag;
@@ -280,13 +300,13 @@ void MyClient::saveLog(QString &str)
     QString dirct = "log";
     QDir dir;
     if(!dir.exists(dirct))dir.mkdir(dirct);
-    QString path = dirct + "/" + QDateTime::currentDateTime().toString("yyyyMMdd__")+m_ip+"_"+QString::number(m_port)+".log";
+    QString path = dirct + "/" + QDateTime::currentDateTime().toString("yyyyMMdd__")+m_ip+".log";
     QFile file(path);
     QString log ;
     bool ret = file.open(QIODevice::Append);
     if(!ret)return;
-    log += QDateTime::currentDateTime().toString("[yyyy.MM.dd hh:mm:ss]  : \r\n");
-    log += str +"\r\n";
+    log += QDateTime::currentDateTime().toString("[yyyy.MM.dd hh:mm:ss]:\r\n");
+    log += str;
     file.write(log.toUtf8());
     file.close();
 }

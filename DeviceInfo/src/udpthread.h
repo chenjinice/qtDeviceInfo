@@ -4,6 +4,7 @@
 class QThread;
 class QUdpSocket;
 class MainWindow;
+class QTimer;
 
 #include <QObject>
 #include "common.h"
@@ -21,6 +22,7 @@ private:
     QString            m_ip;
     QThread          * m_thread;
     QUdpSocket       * m_udp;
+    QTimer           * m_timer;
     QList<QString>     m_list;
 
     UdpThread();

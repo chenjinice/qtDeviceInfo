@@ -35,6 +35,7 @@ public slots:
     void clearClicked();
     void addClicked();
     void checkBoxChanged(int value);
+    void sortBoxChanged(int value);
 };
 
 #endif // MAINWINDOW_H

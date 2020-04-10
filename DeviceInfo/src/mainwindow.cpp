@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->createButton();
     m_layout->addWidget(m_table);
     this->setMinimumSize(1000,500);
-    this->setWindowTitle("测试软件 - V2020.04.09");
+    this->setWindowTitle("测试软件 - V2020.04.10");
 }
 
 MainWindow::~MainWindow()
@@ -75,20 +75,21 @@ void MainWindow::createButton()
     hbox->setAlignment(Qt::AlignLeft);
     QLabel *label_other = new QLabel("其他 ：");
     QCheckBox *check_box = new QCheckBox("自动连接");
-    QPushButton *sort_bt = new QPushButton("按IP排序");
+    QCheckBox *sort_box = new QCheckBox("按ip排序");
     QPushButton *clear = new QPushButton("清表格");
-    QPushButton *add = new QPushButton("添IP");
+    QPushButton *add = new QPushButton("添ip");
     hbox->addWidget(label_other);
-    hbox->addWidget(check_box);
-    hbox->addWidget(sort_bt);
+//    hbox->addWidget(check_box);
+    hbox->addWidget(sort_box);
     hbox->addWidget(clear);
     hbox->addWidget(add);
     m_layout->addLayout(hbox);
+    sort_box->setChecked(Setting::ins()->getAutoSort());
     check_box->setChecked(Setting::ins()->getMode());
     connect(add,&QPushButton::clicked,this,&MainWindow::addClicked);
     connect(clear,&QPushButton::clicked,this,&MainWindow::clearClicked);
     connect(check_box,&QCheckBox::stateChanged,this,&MainWindow::checkBoxChanged);
-    connect(sort_bt,&QPushButton::clicked,m_table,&MyTable::sortByIp);
+    connect(sort_box,&QCheckBox::stateChanged,this,&MainWindow::sortBoxChanged);
 }
 
 void MainWindow::udpState(bool flag)
@@ -123,5 +124,15 @@ void MainWindow::checkBoxChanged(int value)
         m_table->connectAll();
     }
     Setting::ins()->setMode(flag);
+}
+
+void MainWindow::sortBoxChanged(int value)
+{
+    bool flag = false;
+    if(value > 0){
+        flag = true;
+        m_table->sortByIp();
+    }
+    Setting::ins()->setAutoSort(flag);
 }
 

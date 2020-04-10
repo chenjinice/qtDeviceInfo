@@ -14,9 +14,10 @@ public:
     QString getEditIp();
     void setMode(bool flag);
     bool getMode();
+    void setAutoSort(bool flag);
+    bool getAutoSort();
 
 private:
-    bool             m_mode;
     static Setting * m_instance;
 
     Setting();

@@ -45,6 +45,7 @@ private:
     void parseData(QString &str);
     bool parsePre1(QString &str, ToUiData &d);
     bool parsePre2(QString &str, ToUiData &d);
+    QString getLtevrxText(QString &str);
     bool checkTime(QString &str);
     void saveLog(QString &str);
 

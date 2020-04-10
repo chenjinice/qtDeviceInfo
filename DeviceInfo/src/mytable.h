@@ -22,7 +22,6 @@ public:
 
 private:
     int                    m_ipIndex;
-    int                    m_getRtcIndex;
     int                    m_setRtcIndex;
     QMenu                * m_menu;
     QAction              * m_con;
@@ -31,6 +30,9 @@ private:
     QAction              * m_eeprom;
     QAction              * m_getRtc;
     QAction              * m_setRtc;
+    QAction              * m_ledOn;
+    QAction              * m_ledOff;
+    QAction              * m_ledFlash;
     QAction              * m_del;
     QAction              * m_factory;
     QStringList            m_header;
