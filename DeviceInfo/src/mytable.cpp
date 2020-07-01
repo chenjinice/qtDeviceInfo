@@ -99,18 +99,18 @@ void MyTable::sortByIp()
 
 void MyTable::createMenu()
 {
-    m_menu = new QMenu(this);
-    m_con = new QAction("连接");
-    m_disCon = new QAction("断开");
-    m_tf  = new QAction("测tf");
-    m_eeprom = new QAction("测eeprom");
-    m_getRtc = new QAction("获取RTC");
-    m_setRtc = new QAction("更新RTC");
-    m_ledOn  = new QAction("灯亮");
-    m_ledOff = new QAction("灯灭");
-    m_ledFlash  = new QAction("灯闪烁");
-    m_del = new QAction("删除");
-    m_factory = new QAction("恢复出厂设置");
+    m_menu          = new QMenu(this);
+    m_con           = new QAction("连接");
+    m_disCon        = new QAction("断开");
+    m_tf            = new QAction("测tf");
+    m_eeprom        = new QAction("测eeprom");
+    m_getRtc        = new QAction("获取RTC");
+    m_setRtc        = new QAction("更新RTC");
+    m_ledOn         = new QAction("灯亮");
+    m_ledOff        = new QAction("灯灭");
+    m_ledFlash      = new QAction("灯闪烁");
+    m_del           = new QAction("删除");
+    m_factory       = new QAction("恢复出厂设置");
     m_menu->addAction(m_tf);
     m_menu->addAction(m_eeprom);
 //    m_menu->addAction(m_getRtc);
@@ -121,7 +121,7 @@ void MyTable::createMenu()
     m_menu->addSeparator();
     m_menu->addAction(m_con);
     m_menu->addAction(m_disCon);
-//    m_menu->addAction(m_del);
+    m_menu->addAction(m_del);
     m_menu->addSeparator();
 //    m_menu->addAction(m_factory);
 //    m_factory->setEnabled(false);
@@ -140,7 +140,7 @@ void MyTable::createMenu()
 
 void MyTable::showContextMenu(const QPoint &pos)
 {
-//    qDebug() << pos;
+    qDebug() << pos;
     m_menu->exec(QCursor::pos());
 }
 
@@ -224,11 +224,4 @@ void MyTable::showData(ToUiData d)
         item->setText(text);
     }
 }
-
-void MyTable::getClientdeleted()
-{
-    MyClient *s = qobject_cast<MyClient *>(sender());
-    delete s;
-}
-
 

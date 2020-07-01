@@ -14,15 +14,18 @@
 MyClient::MyClient(QString ip, uint16_t port)
 {
     m_connected = false;
-    m_ip = ip;
-    m_port = port;
-    m_thread = new QThread;
-    m_socket = nullptr;
-    m_timer  = nullptr;
-    m_items  = getTestItems();
+    m_ip            = ip;
+    m_port          = port;
+    m_thread        = new QThread;
+    m_socket        = nullptr;
+    m_timer         = nullptr;
+    m_monitor       = nullptr;
+    m_items         = getTestItems();
 
     this->moveToThread(m_thread);
     connect(m_thread,&QThread::started,this,&MyClient::threadRun);
+    connect(m_thread,&QThread::finished,this,&MyClient::deleteConnection);
+
     m_thread->start();
 }
 
@@ -138,7 +141,10 @@ void MyClient::deleteConnection()
 
 void MyClient::send(const char *cmd)
 {
-    if(m_connected)m_socket->write(cmd,strlen(cmd));
+    if(cmd == nullptr)return;
+    if(m_connected){
+        m_socket->write(cmd,strlen(cmd));
+    }
 }
 
 void MyClient::getUiCmd(UiCmdData d)
@@ -153,11 +159,10 @@ void MyClient::getUiCmd(UiCmdData d)
         this->sockDisconnectHost();
         break;
     case UI_SEND:
-        if(d.str != nullptr)this->send(d.str);
+        this->send(d.str);
         break;
     case UI_DELETE:
         this->deleteConnection();
-        emit clientDeleted();
         break;
     default:
         break;

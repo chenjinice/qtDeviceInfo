@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "mytableitem.h"
 #include "myclient.h"
 #include "mytable.h"
@@ -15,6 +16,7 @@ MyTableItem::MyTableItem(MyTable *ui)
 
 MyTableItem::~MyTableItem()
 {
+    if(m_client)delete m_client;
 }
 
 void MyTableItem::setParam(QString &ip)
@@ -27,7 +29,6 @@ void MyTableItem::setParam(QString &ip)
     m_client = new MyClient(ip,port);
     QObject::connect(m_ui,&MyTable::uiCmd,m_client,&MyClient::getUiCmd);
     QObject::connect(m_client,&MyClient::toUi,m_ui,&MyTable::showData);
-    QObject::connect(m_client,&MyClient::clientDeleted,m_ui,&MyTable::getClientdeleted);
 //    qDebug() << ip << ":" << m_sortId;
 }
 

@@ -12,7 +12,7 @@ class MyClient;
 #define C_UDPTIME       3000     // udp绑定端口定时器间隔，毫秒
 #define C_RETIME        5000     // tcp重连定时器间隔 ,毫秒
 #define C_MOTIME        5000     // 监控定时器间隔 ,毫秒
-#define C_MAXTIME       5        // 多长时间没收到数据就断开 ,秒
+#define C_MAXTIME       30       // 多长时间没收到数据就断开 ,秒
 
 
 // 发送指令

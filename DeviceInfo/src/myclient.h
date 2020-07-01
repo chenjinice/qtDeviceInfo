@@ -54,7 +54,6 @@ public slots:
 
 signals:
     void toUi(ToUiData d);
-    void clientDeleted();
 
 };
 

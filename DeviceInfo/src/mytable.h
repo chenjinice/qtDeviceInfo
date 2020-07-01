@@ -45,7 +45,7 @@ private:
 
 public slots:
     void showData(ToUiData d);
-    void getClientdeleted();
+
 
 signals:
     void uiCmd(UiCmdData d);
