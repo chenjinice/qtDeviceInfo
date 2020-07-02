@@ -1,5 +1,6 @@
 #include <QNetworkInterface>
 #include <QDebug>
+#include <QString>
 #include "common.h"
 
 
@@ -42,4 +43,13 @@ QStringList getTestItems()
     }
     return g_items;
 }
+
+void getTestItemsUi(QStringList &l)
+{
+    l = getTestItems();
+    l.replace(l.indexOf(CI_TMP1),QObject::tr(CI_TMP1_UI));
+    l.replace(l.indexOf(CI_TMP2),QObject::tr(CI_TMP2_UI));
+    l.replace(l.indexOf(CI_TIME),QObject::tr(CI_TIME_UI));
+}
+
 

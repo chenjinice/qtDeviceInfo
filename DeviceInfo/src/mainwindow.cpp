@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     this->createCombo();
     this->createButton();
     m_layout->addWidget(m_table);
-    this->setMinimumSize(1000,500);
-    this->setWindowTitle("测试软件 - V2020.06.30");
+    this->setMinimumSize(500,500);
+    this->setWindowTitle("测试软件 - V2020.07.02");
 }
 
 MainWindow::~MainWindow()
@@ -47,7 +47,7 @@ void MainWindow::createCombo()
     QHBoxLayout *hbox = new QHBoxLayout;
     hbox->setAlignment(Qt::AlignLeft);
     QStringList l = getSelfIp();
-    QLabel *label_card     = new QLabel("Udp ：");
+    QLabel *label_card     = new QLabel(tr("Udp ："));
     m_labelState           = new QLabel;
     m_labelState->setFixedSize(15,15);
     m_labelState->setScaledContents(true);
@@ -73,11 +73,10 @@ void MainWindow::createButton()
 {
     QHBoxLayout *hbox = new QHBoxLayout;
     hbox->setAlignment(Qt::AlignLeft);
-    QLabel *label_other = new QLabel("其他 ：");
-    QCheckBox *check_box = new QCheckBox("自动连接");
-    QCheckBox *sort_box = new QCheckBox("按ip排序");
-    QPushButton *clear = new QPushButton("清表格");
-    QPushButton *add = new QPushButton("添ip");
+    QLabel *label_other = new QLabel(tr("其他 ："));
+    QCheckBox *sort_box = new QCheckBox(tr("按ip排序"));
+    QPushButton *clear = new QPushButton(tr("清表格"));
+    QPushButton *add = new QPushButton(tr("添ip"));
     hbox->addWidget(label_other);
 //    hbox->addWidget(check_box);
     hbox->addWidget(sort_box);
@@ -85,10 +84,8 @@ void MainWindow::createButton()
     hbox->addWidget(add);
     m_layout->addLayout(hbox);
     sort_box->setChecked(Setting::ins()->getAutoSort());
-    check_box->setChecked(Setting::ins()->getMode());
     connect(add,&QPushButton::clicked,this,&MainWindow::addClicked);
     connect(clear,&QPushButton::clicked,this,&MainWindow::clearClicked);
-    connect(check_box,&QCheckBox::stateChanged,this,&MainWindow::checkBoxChanged);
     connect(sort_box,&QCheckBox::stateChanged,this,&MainWindow::sortBoxChanged);
 }
 
@@ -114,16 +111,6 @@ void MainWindow::addClicked()
     }
     s_dialog->setWindowFlags(Qt::WindowStaysOnTopHint);
     s_dialog->show();
-}
-
-void MainWindow::checkBoxChanged(int value)
-{
-    bool flag = false;
-    if(value > 0){
-        flag = true;
-        m_table->connectAll();
-    }
-    Setting::ins()->setMode(flag);
 }
 
 void MainWindow::sortBoxChanged(int value)

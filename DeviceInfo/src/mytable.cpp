@@ -8,13 +8,13 @@
 #include "mytableitem.h"
 #include "myclient.h"
 #include "setting.h"
-
+#include "udpthread.h"
 
 MyTable::MyTable()
 {
     qRegisterMetaType<UiCmdData>("UiCmdData");
     qRegisterMetaType<ToUiData>("ToUiData");
-    m_header = getTestItems();
+    getTestItemsUi(m_header);
     m_ipIndex = m_header.indexOf(CI_IP);
     m_setRtcIndex = m_header.indexOf(CI_RTCSET);
     int cols = m_header.count();
@@ -47,7 +47,7 @@ MyTable::~MyTable()
     for (int i=0;i<rows;i++) {
         for(int m=0;m<cols;m++){
             QTableWidgetItem *item = this->item(i,m);
-            delete item;
+            if(item)delete item;
         }
     }
     this->clear();
@@ -100,17 +100,17 @@ void MyTable::sortByIp()
 void MyTable::createMenu()
 {
     m_menu          = new QMenu(this);
-    m_con           = new QAction("连接");
-    m_disCon        = new QAction("断开");
-    m_tf            = new QAction("测tf");
-    m_eeprom        = new QAction("测eeprom");
-    m_getRtc        = new QAction("获取RTC");
-    m_setRtc        = new QAction("更新RTC");
-    m_ledOn         = new QAction("灯亮");
-    m_ledOff        = new QAction("灯灭");
-    m_ledFlash      = new QAction("灯闪烁");
-    m_del           = new QAction("删除");
-    m_factory       = new QAction("恢复出厂设置");
+    m_con           = new QAction(tr("连接"));
+    m_disCon        = new QAction(tr("断开"));
+    m_tf            = new QAction(tr("测tf"));
+    m_eeprom        = new QAction(tr("测eeprom"));
+    m_getRtc        = new QAction(tr("获取RTC"));
+    m_setRtc        = new QAction(tr("更新RTC"));
+    m_ledOn         = new QAction(tr("灯亮"));
+    m_ledOff        = new QAction(tr("灯灭"));
+    m_ledFlash      = new QAction(tr("灯闪烁"));
+    m_del           = new QAction(tr("删除"));
+    m_factory       = new QAction(tr("恢复出厂设置"));
     m_menu->addAction(m_tf);
     m_menu->addAction(m_eeprom);
 //    m_menu->addAction(m_getRtc);
@@ -187,8 +187,12 @@ void MyTable::del(QList<int> &l)
     for(int i=row_count-1;i>=0;i--){
         int row = l[i];
         for(int j=0;j<col_count;j++){
-            QTableWidgetItem *item = this->item(row,j);
-            if(item)delete item;
+            MyTableItem *item = dynamic_cast<MyTableItem *>(this->item(row,j));
+            if(item){
+                MyClient *client = item->getClient();
+                if(client)UdpThread::ins()->del(client->ip());
+                delete item;
+            }
         }
         this->removeRow(row);
     }

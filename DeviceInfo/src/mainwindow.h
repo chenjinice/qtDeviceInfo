@@ -34,7 +34,6 @@ public slots:
     void udpState(bool flag);
     void clearClicked();
     void addClicked();
-    void checkBoxChanged(int value);
     void sortBoxChanged(int value);
 };
 

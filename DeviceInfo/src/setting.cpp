@@ -1,10 +1,5 @@
 #include "setting.h"
 
-#define CS_MODE     "mode"
-#define CS_CARD     "card"
-#define CS_EDITIP   "editIp"
-#define CS_SORT     "autoSort"
-
 
 Setting *Setting::m_instance = nullptr;
 
@@ -29,16 +24,6 @@ void Setting::setCard(QString str)
 QString Setting::getCard()
 {
     return this->value(CS_CARD).toString();
-}
-
-void Setting::setEditIp(QString ip)
-{
-    this->setValue(CS_EDITIP,ip);
-}
-
-QString Setting::getEditIp()
-{
-    return this->value(CS_EDITIP).toString();
 }
 
 void Setting::setMode(bool flag)

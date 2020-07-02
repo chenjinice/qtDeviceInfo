@@ -7,6 +7,7 @@ class MainWindow;
 class QTimer;
 
 #include <QObject>
+#include <QMutex>
 #include "common.h"
 
 class UdpThread : public QObject
@@ -14,21 +15,27 @@ class UdpThread : public QObject
     Q_OBJECT
 public:
     static UdpThread *ins();
-    void startThread(QString &ip);
     ~UdpThread();
+    void startThread(QString &ip);
+    void add(const QString &ip);
+    void del(const QString &ip);
 
 private:
+    UdpThread();
+    void threadRun();
+    void threadFinish();
+    void bindUdp();
+    void closeUdp();
+    void readData();
+
     static UdpThread * m_instance;
+    bool               m_ready;
     QString            m_ip;
     QThread          * m_thread;
     QUdpSocket       * m_udp;
     QTimer           * m_timer;
     QList<QString>     m_list;
-
-    UdpThread();
-    void threadRun();
-    void bindIp();
-    void readData();
+    QMutex             m_mutex;
 
 public slots:
     void setIp(QString ip);

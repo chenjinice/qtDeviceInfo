@@ -29,7 +29,6 @@ void MyTableItem::setParam(QString &ip)
     m_client = new MyClient(ip,port);
     QObject::connect(m_ui,&MyTable::uiCmd,m_client,&MyClient::getUiCmd);
     QObject::connect(m_client,&MyClient::toUi,m_ui,&MyTable::showData);
-//    qDebug() << ip << ":" << m_sortId;
 }
 
 void MyTableItem::setBoolIcon(bool flag)
