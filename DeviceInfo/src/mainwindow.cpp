@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     this->createCombo();
     this->createButton();
     m_layout->addWidget(m_table);
-    this->setMinimumSize(500,500);
-    this->setWindowTitle("测试软件 - V2020.07.02");
+    this->setMinimumSize(1000,500);
+    this->setWindowTitle("测试软件 - V2020.07.07");
 }
 
 MainWindow::~MainWindow()

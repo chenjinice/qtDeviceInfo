@@ -45,6 +45,11 @@ class MyClient;
 #define CI_TMP1         "board_tmp"
 #define CI_TMP2         "cpu_tmp"
 #define CI_TIME         "device_time"
+#define CI_OBD          "obd"
+#define CI_RS232        "rs232"
+#define CI_RS422        "rs422"
+#define CI_OTG          "otg"
+#define CI_SECU         "secu"
 
 // 测试项目UI显示
 #define CI_TMP1_UI      "主板温度"

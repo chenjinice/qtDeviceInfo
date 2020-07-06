@@ -304,7 +304,7 @@ void MyClient::saveLog(QString &str)
 {
     QString dirct = "log";
     QDir dir;
-    if(!dir.exists(dirct))dir.mkdir(dirct);
+    if(!dir.exists(dirct))dir.mkpath(dirct);
     QString path = dirct + "/" + QDateTime::currentDateTime().toString("yyyyMMdd__")+m_ip+".log";
     QFile file(path);
     QString log ;
