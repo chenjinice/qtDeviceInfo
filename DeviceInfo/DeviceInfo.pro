@@ -29,21 +29,23 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
     src/common.cpp \
-        src/mainwindow.cpp \
+    src/mainwindow.cpp \
     src/myclient.cpp \
     src/mydialog.cpp \
     src/mytable.cpp \
     src/mytableitem.cpp \
+    src/sethidedialog.cpp \
     src/setting.cpp \
     src/udpthread.cpp
 
 HEADERS += \
     src/common.h \
-        src/mainwindow.h \
+    src/mainwindow.h \
     src/myclient.h \
     src/mydialog.h \
     src/mytable.h \
     src/mytableitem.h \
+    src/sethidedialog.h \
     src/setting.h \
     src/udpthread.h
 

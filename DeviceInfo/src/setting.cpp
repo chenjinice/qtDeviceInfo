@@ -46,6 +46,18 @@ bool Setting::getAutoSort()
     return this->value(CS_SORT).toBool();
 }
 
+void Setting::setHide(const QString &item,bool flag)
+{
+    QString key = QString(CS_HIDE)+item;
+    this->setValue(key,flag);
+}
+
+bool Setting::getHide(const QString &item)
+{
+    QString key = QString(CS_HIDE)+item;
+    return this->value(key).toBool();
+}
+
 
 
 

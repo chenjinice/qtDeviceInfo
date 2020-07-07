@@ -302,13 +302,23 @@ bool MyClient::checkTime(QString &str)
 
 void MyClient::saveLog(QString &str)
 {
+    static int log_size = C_LOGSIZE;
     QString dirct = "log";
     QDir dir;
     if(!dir.exists(dirct))dir.mkpath(dirct);
-    QString path = dirct + "/" + QDateTime::currentDateTime().toString("yyyyMMdd__")+m_ip+".log";
+    QString path = dirct + "/" + m_ip + ".log";
     QFile file(path);
+
+    QFileInfo info(path);
+    if(info.size() > log_size){
+        QString old_path = dirct + "/" + m_ip + "____old.log";
+        QFile   old_file(old_path);
+        old_file.remove();
+        file.rename(old_path);
+    }
+
     QString log ;
-    bool ret = file.open(QIODevice::Append);
+    bool ret = file.open(QIODevice::Append | QIODevice::Text);
     if(!ret)return;
     log += QDateTime::currentDateTime().toString("[yyyy.MM.dd hh:mm:ss]:\r\n");
     log += str;

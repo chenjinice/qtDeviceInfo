@@ -10,11 +10,12 @@
 #include "setting.h"
 #include "udpthread.h"
 
+
 MyTable::MyTable()
 {
     qRegisterMetaType<UiCmdData>("UiCmdData");
     qRegisterMetaType<ToUiData>("ToUiData");
-    getTestItemsUi(m_header);
+    m_header  = getTestItemsUi();
     m_ipIndex = m_header.indexOf(CI_IP);
     m_setRtcIndex = m_header.indexOf(CI_RTCSET);
     int cols = m_header.count();
@@ -31,6 +32,11 @@ MyTable::MyTable()
     this->horizontalHeader()->setSectionResizeMode(m_ipIndex, QHeaderView::ResizeToContents);
     this->horizontalHeader()->setSectionResizeMode(m_setRtcIndex, QHeaderView::ResizeToContents);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    for(int i=0;i<m_header.length();i++){
+        bool flag = Setting::ins()->getHide(m_header.at(i));
+        if(flag)this->setColumnHidden(i,true);
+    }
 
     connect(this,&MyTable::customContextMenuRequested,this,&MyTable::showContextMenu);
 }
@@ -95,6 +101,12 @@ void MyTable::clearResult()
 void MyTable::sortByIp()
 {
     this->sortByColumn(m_ipIndex,Qt::AscendingOrder);
+}
+
+void MyTable::hideItem(QString item, bool flag)
+{
+    int column = m_header.indexOf(item);
+    this->setColumnHidden(column,flag);
 }
 
 void MyTable::createMenu()

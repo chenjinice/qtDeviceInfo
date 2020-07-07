@@ -7,6 +7,9 @@ class MyClient;
 #include <QStringList>
 
 
+#define C_LOGSIZE       1024*1024*50
+
+
 #define C_TCPPORT       12301
 #define C_UDPPORT       12302
 #define C_UDPTIME       3000     // udp绑定端口失败时，重新绑定间隔（也是广播数据间隔），毫秒
@@ -16,7 +19,7 @@ class MyClient;
 
 
 // 发送指令
-#define CC_ALL          "ttuv2x +ltev"
+#define CC_ALL          "ttuv2x all"
 #define CC_TF           "ttfcar"
 #define CC_EEPROM       "tteeprom"
 #define CC_GETRTC       "rtc-get"
@@ -42,19 +45,15 @@ class MyClient;
 #define CI_EEPROM       "eeprom"
 #define CI_RTCGET       "rtc_get"
 #define CI_RTCSET       "rtc_set"
-#define CI_TMP1         "board_tmp"
-#define CI_TMP2         "cpu_tmp"
-#define CI_TIME         "device_time"
+#define CI_TMP1         "主板温度"
+#define CI_TMP2         "CPU温度"
+#define CI_TIME         "设备时间"
 #define CI_OBD          "obd"
 #define CI_RS232        "rs232"
 #define CI_RS422        "rs422"
 #define CI_OTG          "otg"
 #define CI_SECU         "secu"
 
-// 测试项目UI显示
-#define CI_TMP1_UI      "主板温度"
-#define CI_TMP2_UI      "CPU温度"
-#define CI_TIME_UI      "设备时间"
 
 enum UICMD{
     UI_NONE,
@@ -68,7 +67,7 @@ enum UICMD{
 uint ipToNumber(QString &ip);
 QStringList getSelfIp();
 QStringList getTestItems();
-void getTestItemsUi(QStringList &l);
+QStringList getTestItemsUi();
 
 
 

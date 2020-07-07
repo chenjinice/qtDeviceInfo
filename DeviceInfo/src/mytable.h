@@ -19,6 +19,7 @@ public:
     void connectAll();
     void clearResult();
     void sortByIp();
+    void hideItem(QString item,bool flag);
 
 private:
     int                    m_ipIndex;

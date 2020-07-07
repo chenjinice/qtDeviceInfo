@@ -12,18 +12,22 @@
 #define CS_IP3      "ip3"
 #define CS_IP4      "ip4"
 #define CS_TO4      "to4"
+#define CS_HIDE     "hide_"
 
 
 class Setting : public QSettings
 {
 public:
     static Setting *ins();
-    void setCard(QString str);
-    QString getCard();
-    void setMode(bool flag);
-    bool getMode();
-    void setAutoSort(bool flag);
-    bool getAutoSort();
+
+    void            setCard(QString str);
+    QString         getCard();
+    void            setMode(bool flag);
+    bool            getMode();
+    void            setAutoSort(bool flag);
+    bool            getAutoSort();
+    void            setHide(const QString &item, bool flag);
+    bool            getHide(const QString &item);
 
 private:
     static Setting * m_instance;

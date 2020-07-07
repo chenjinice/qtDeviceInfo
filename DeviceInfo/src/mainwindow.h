@@ -26,14 +26,15 @@ private:
     UdpThread    * m_udpThread;
     MyTable      * m_table;
 
+    void createMenu();
     void createCentralWidget();
     void createCombo();
     void createButton();
+    void aboutMe();
 
 public slots:
     void udpState(bool flag);
     void clearClicked();
-    void addClicked();
     void sortBoxChanged(int value);
 };
 

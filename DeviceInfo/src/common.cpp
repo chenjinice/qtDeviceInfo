@@ -5,6 +5,7 @@
 
 
 static QStringList g_items;
+static QStringList g_ui_items;
 
 
 uint ipToNumber(QString &ip)
@@ -38,19 +39,19 @@ QStringList getSelfIp()
 QStringList getTestItems()
 {
     if(g_items.count() == 0){
-        g_items << CI_IP << CI_LTEVRX   << CI_USB << CI_GPS << CI_RS485 << CI_CAN << CI_4G << CI_RJ45 << CI_WIFI
-                << CI_TF << CI_EEPROM << CI_RTCSET << CI_TMP1 << CI_TMP2 << CI_TIME << CI_OBD << CI_RS232 << CI_RS422
+        g_items << CI_IP  << CI_LTEVRX << CI_USB    << CI_GPS  << CI_RS485 << CI_CAN  << CI_4G  << CI_RJ45  << CI_WIFI
+                << CI_TF  << CI_EEPROM << CI_RTCSET << CI_TMP1 << CI_TMP2  << CI_TIME << CI_OBD << CI_RS232 << CI_RS422
                 << CI_OTG << CI_SECU ;
     }
     return g_items;
 }
 
-void getTestItemsUi(QStringList &l)
+QStringList getTestItemsUi()
 {
-    l = getTestItems();
-    l.replace(l.indexOf(CI_TMP1),QObject::tr(CI_TMP1_UI));
-    l.replace(l.indexOf(CI_TMP2),QObject::tr(CI_TMP2_UI));
-    l.replace(l.indexOf(CI_TIME),QObject::tr(CI_TIME_UI));
+    if(g_ui_items.count() == 0){
+        g_ui_items = getTestItems();
+    }
+    return g_ui_items;
 }
 
 

@@ -11,15 +11,27 @@
 #include "mydialog.h"
 #include "udpthread.h"
 
+
+MyDialog *MyDialog::m_instance = nullptr;
+
+
+MyDialog *MyDialog::ins()
+{
+    if(m_instance == nullptr){
+        m_instance = new MyDialog;
+    }
+    return m_instance;
+}
+
 MyDialog::MyDialog()
 {
     QFont font( "Microsoft YaHei",10,75);
     QRegExp rx("^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])");
     QRegExpValidator *  reg = new QRegExpValidator(rx, this);
     int   width             = 50;
-    QString dot             = tr(".");
+    QString dot             = ".";
 
-    this->setWindowTitle(tr("+"));
+    this->setWindowTitle("添加IP");
     this->setFixedSize(300,200);
     QVBoxLayout *v          = new QVBoxLayout;
     QHBoxLayout *h1         = new QHBoxLayout;
@@ -58,6 +70,8 @@ MyDialog::MyDialog()
     v->addLayout(h_from);v->addLayout(h1);v->addLayout(h_to);
     v->addSpacing(20);v->addLayout(h2);
     this->setLayout(v);
+    Qt::WindowFlags flags = Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint;
+    this->setWindowFlags(flags);
 
     connect(bt_yes,&QPushButton::clicked,this,&MyDialog::yesClicked);
     connect(bt_no,&QPushButton::clicked,this,&MyDialog::noClicked);
