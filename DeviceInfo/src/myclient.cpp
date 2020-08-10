@@ -13,7 +13,7 @@
 
 MyClient::MyClient(QString ip, uint16_t port)
 {
-    m_connected = false;
+    m_connected     = false;
     m_ip            = ip;
     m_port          = port;
     m_thread        = new QThread;
