@@ -218,6 +218,8 @@ bool MyClient::parsePre1(QString &str, ToUiData &d)
         if(arr.count() > 1)idata.text = arr[1]+" ms";
     }else if(item == CI_LTEVRX) {
          idata.text = this->getLtevrxText(str);
+    }else if(item == CI_RADAR){
+        if(array.length() > 2)idata.text = array[2] + "目标";
     }else if((item == CI_RTCGET) || (item == CI_RTCSET)){
         int count = array.length()-2;
         QString text;
