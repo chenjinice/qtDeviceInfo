@@ -38,6 +38,7 @@ class MyClient;
 #define CI_GPS          "gps"
 #define CI_RS485        "rs485"
 #define CI_CAN          "can"
+#define CI_RADAR        "radar"
 #define CI_4G           "4G"
 #define CI_RJ45         "rj45"
 #define CI_WIFI         "wifi"

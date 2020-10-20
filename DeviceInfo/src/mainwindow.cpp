@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->createButton();
     m_layout->addWidget(m_table);
     this->setMinimumSize(1000,500);
-    this->setWindowTitle("测试软件 - V2020.07.07");
+    this->setWindowTitle("测试软件 - V2020.10.20");
 }
 
 MainWindow::~MainWindow()
